@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="es" data-skin="obsidian" data-density="normal" data-motion="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="Scraper 404 Omniscient: auditoría web avanzada con motor local Playwright opcional, extracción, capturas, PDF, OCR e IA local.">
+  <meta name="theme-color" content="#090b11">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-+FlFay4z1u6CyeimPuXpj/9GPRao4t1lS4T2Fz7JFBs='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src https: http:; font-src 'self' data: https:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta property="og:title" content="Scraper 404 Omniscient">
+  <meta property="og:description" content="Analiza contenido, SEO, accesibilidad, tecnología y diseño. Exporta tokens, CSS, informes y prompts.">
+  <meta property="og:type" content="website">
+  <title>Scraper 404 Omniscient — Web + Local Intelligence Engine</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" sizes="180x180">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    /* Aplica preferencias visuales antes del primer pintado (evita FOUC). */
+    (function () {
+      var d = document.documentElement, s = { skin: 'obsidian', density: 'normal', motion: 'on' };
+      try { Object.assign(s, JSON.parse(localStorage.getItem('scraper404_definitive_appearance') || '{}')); } catch (e) {}
+      var skins = ['obsidian', 'cobalt', 'viridian', 'crimson', 'mono', 'paper'];
+      d.dataset.skin = skins.indexOf(s.skin) > -1 ? s.skin : 'obsidian';
+      d.dataset.density = ['compact', 'normal', 'comfortable'].indexOf(s.density) > -1 ? s.density : 'normal';
+      d.dataset.motion = s.motion === 'off' ? 'off' : 'on';
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="./" aria-label="Scraper 404, inicio">
+        <span class="brand__mark" aria-hidden="true"><img src="assets/logo-cosmos-404.webp" alt="" width="42" height="42" decoding="async"></span>
+        <span>
+          <strong>SCRAPER <em>404</em></strong>
+          <small>Web Intelligence Suite</small>
+        </span>
+      </a>
+      <div class="topbar__actions">
+        <span class="status-pill" id="network-pill"><span aria-hidden="true"></span>En línea</span>
+        <button class="status-pill engine-pill" id="engine-pill" type="button" title="Estado del motor local"><span aria-hidden="true"></span><b>Motor local</b>: desconectado</button>
+        <button class="icon-btn" id="btn-skin" type="button" aria-label="Cambiar apariencia" title="Apariencia y skins">
+          <span aria-hidden="true">◐</span>
+        </button>
+        <button class="icon-btn" id="btn-settings" type="button" aria-label="Abrir configuración" title="Configuración">
+          <span aria-hidden="true">⚙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="app-shell">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">UNIVERSO 404 · INSPECCIÓN WEB LOCAL</p>
+        <h1 id="hero-title">Desmonta una web.<br><span>Comprende cómo está hecha.</span></h1>
+        <p class="hero__copy">Extrae contenido, arquitectura, SEO, accesibilidad, tecnologías y el sistema visual completo. Conecta el motor local para ejecutar Chromium, Firefox o Edge reales, conservar sesiones, hacer scroll, capturas, PDF, OCR e IA local.</p>
+      </div>
+      <div class="hero__signal" aria-hidden="true">
+        <div class="signal-grid"></div>
+        <div class="signal-ring signal-ring--1"></div>
+        <div class="signal-ring signal-ring--2"></div>
+        <div class="orb"><img src="assets/logo-cosmos-404.webp" alt="" width="180" height="180" loading="eager" fetchpriority="high" decoding="async"></div>
+      </div>
+    </section>
+
+    <section class="analyzer" aria-labelledby="analyzer-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">NUEVO EXPEDIENTE</p>
+          <h2 id="analyzer-title">Fuente de análisis</h2>
+        </div>
+        <button class="ghost-btn" id="btn-demo" type="button">Cargar demo local</button>
+      </div>
+
+      <div class="mode-switch" role="tablist" aria-label="Origen del análisis">
+        <button class="mode-switch__item is-active" role="tab" aria-selected="true" aria-controls="source-url" id="mode-url" data-mode="url" type="button">URL pública</button>
+        <button class="mode-switch__item" role="tab" aria-selected="false" aria-controls="source-paste" id="mode-paste" data-mode="paste" type="button">Pegar código</button>
+        <button class="mode-switch__item" role="tab" aria-selected="false" aria-controls="source-local" id="mode-local" data-mode="local" type="button">Proyecto local</button>
+        <button class="mode-switch__item" role="tab" aria-selected="false" aria-controls="source-batch" id="mode-batch" data-mode="batch" type="button">Lote de URLs</button>
+      </div>
+
+      <div class="source-panel is-active" id="source-url" role="tabpanel" aria-labelledby="mode-url">
+        <label class="field-label" for="url-input">URL objetivo</label>
+        <div class="url-row">
+          <input id="url-input" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://ejemplo.com">
+          <button class="primary-btn" id="btn-analyze" type="button"><span>Analizar página</span><b aria-hidden="true">→</b></button>
+        </div>
+        <div class="source-options">
+          <label class="check-row"><input id="opt-css" type="checkbox" checked> <span>Descargar y analizar CSS externo</span></label>
+          <label class="check-row"><input id="opt-site-files" type="checkbox" checked> <span>Consultar robots.txt y sitemap</span></label>
+          <label class="check-row"><input id="opt-deep" type="checkbox"> <span>Análisis profundo de recursos</span></label>
+          <label class="check-row"><input id="opt-rendered" type="checkbox"> <span>Rescate SPA web mediante r.jina.ai cuando no haya motor local</span></label>
+          <label class="check-row local-option"><input id="opt-local-engine" type="checkbox" checked> <span>Preferir motor local Playwright</span></label>
+          <label class="check-row local-option"><input id="opt-scroll" type="checkbox"> <span>Scroll inteligente para carga diferida e infinito</span></label>
+          <label class="check-row local-option"><input id="opt-screenshot" type="checkbox" checked> <span>Crear captura PNG completa</span></label>
+          <label class="check-row local-option"><input id="opt-pdf" type="checkbox"> <span>Crear PDF (Chromium, Chrome o Edge)</span></label>
+        </div>
+        <p class="field-help">Sin motor local se mantiene el modo web y sus proxies CORS. Con el motor local, la URL se abre en un navegador real de tu equipo. Las sesiones y artefactos permanecen en tu dispositivo.</p>
+      </div>
+
+      <div class="source-panel" id="source-paste" role="tabpanel" aria-labelledby="mode-paste" hidden>
+        <div class="split-fields">
+          <div>
+            <label class="field-label" for="paste-base">URL base para resolver recursos</label>
+            <input id="paste-base" type="url" value="https://example.local/" spellcheck="false">
+          </div>
+          <div>
+            <label class="field-label" for="paste-css">CSS adicional opcional</label>
+            <textarea id="paste-css" rows="5" spellcheck="false" placeholder=":root { --primary: #7c5cff; }"></textarea>
+          </div>
+        </div>
+        <label class="field-label" for="paste-html">HTML completo</label>
+        <textarea id="paste-html" rows="11" spellcheck="false" placeholder="<!doctype html>..."></textarea>
+        <div class="panel-actions"><button class="primary-btn" id="btn-analyze-paste" type="button"><span>Analizar código</span><b aria-hidden="true">→</b></button></div>
+      </div>
+
+      <div class="source-panel" id="source-local" role="tabpanel" aria-labelledby="mode-local" hidden>
+        <div class="dropzone" id="dropzone">
+          <input id="local-files" type="file" multiple accept=".html,.htm,.css,.js,.json,.xml,.svg,.txt" webkitdirectory>
+          <span class="dropzone__icon" aria-hidden="true">⌁</span>
+          <strong>Selecciona una carpeta o arrastra archivos</strong>
+          <p>Se analizarán HTML, CSS, JavaScript, manifest y metadatos del proyecto. Los archivos nunca salen de tu dispositivo.</p>
+          <button class="secondary-btn" id="btn-pick-files" type="button">Elegir proyecto</button>
+        </div>
+        <div class="file-summary" id="file-summary" hidden></div>
+        <div class="panel-actions"><button class="primary-btn" id="btn-analyze-local" type="button" disabled><span>Analizar proyecto</span><b aria-hidden="true">→</b></button></div>
+      </div>
+
+      <div class="source-panel" id="source-batch" role="tabpanel" aria-labelledby="mode-batch" hidden>
+        <label class="field-label" for="batch-input">URLs a comparar (una por línea, máximo 12)</label>
+        <textarea id="batch-input" rows="6" spellcheck="false" placeholder="https://ejemplo.com&#10;https://ejemplo.com/servicios&#10;https://competidor.com"></textarea>
+        <p class="field-help">Modo ligero: descarga solo el HTML inicial de cada página (sin CSS externo ni robots/sitemap) y calcula puntuaciones comparables. Para el expediente completo de una página concreta, usa el modo URL.</p>
+        <div class="panel-actions">
+          <button class="secondary-btn" id="btn-batch-sitemap" type="button">Rellenar desde el último sitemap</button>
+          <button class="primary-btn" id="btn-analyze-batch" type="button"><span>Analizar lote</span><b aria-hidden="true">→</b></button>
+        </div>
+        <div class="batch-results" id="batch-results" hidden>
+          <div class="section-heading compact"><h3>Comparativa del lote</h3><button class="secondary-btn" id="btn-batch-csv" type="button" disabled>CSV</button></div>
+          <div class="code-table-wrap"><table class="data-table" id="batch-table"><thead><tr><th>URL</th><th>Título / error</th><th>Global</th><th>SEO</th><th>A11y</th><th>Perf</th><th>Seg</th><th>Hallazgos</th><th></th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="analysis-status" id="analysis-status" role="status" aria-live="polite" hidden>
+        <div class="analysis-status__top">
+          <div><span class="pulse-dot" aria-hidden="true"></span><strong id="status-title">Preparando análisis</strong></div>
+          <span id="status-percent">0%</span>
+        </div>
+        <div class="progress"><span id="status-progress"></span></div>
+        <div class="analysis-status__bottom">
+          <span id="status-detail">Validando fuente…</span>
+          <button class="text-btn" id="btn-cancel" type="button">Cancelar</button>
+        </div>
+        <div class="status-actions" id="status-actions" hidden></div>
+      </div>
+    </section>
+
+    <section class="results" id="results" aria-labelledby="results-title" hidden>
+      <div class="result-header">
+        <div>
+          <p class="eyebrow">EXPEDIENTE COMPLETADO</p>
+          <h2 id="results-title">Radiografía de la página</h2>
+          <a id="result-url" class="result-url" href="#" target="_blank" rel="noopener noreferrer nofollow"></a>
+          <p id="result-meta" class="result-meta"></p>
+        </div>
+        <div class="result-header__actions">
+          <button class="secondary-btn" id="btn-set-baseline" type="button">Fijar como base A</button>
+          <button class="secondary-btn" id="btn-save-snapshot" type="button">Guardar snapshot</button>
+          <button class="primary-btn" id="btn-export-report" type="button"><span>Exportar informe</span><b aria-hidden="true">↓</b></button>
+        </div>
+      </div>
+
+      <div class="score-grid" id="score-grid"></div>
+
+      <div class="workspace">
+        <nav class="workspace-nav" aria-label="Secciones del informe">
+          <button class="workspace-nav__item is-active" data-view="overview" type="button"><span aria-hidden="true">◫</span>Resumen</button>
+          <button class="workspace-nav__item" data-view="content" type="button"><span aria-hidden="true">¶</span>Contenido</button>
+          <button class="workspace-nav__item" data-view="design" type="button"><span aria-hidden="true">◈</span>Diseño</button>
+          <button class="workspace-nav__item" data-view="seo" type="button"><span aria-hidden="true">◎</span>SEO y contenido</button>
+          <button class="workspace-nav__item" data-view="a11y" type="button"><span aria-hidden="true">◉</span>Accesibilidad</button>
+          <button class="workspace-nav__item" data-view="tech" type="button"><span aria-hidden="true">⌘</span>Tecnologías</button>
+          <button class="workspace-nav__item" data-view="engine" id="engine-nav-item" type="button"><span aria-hidden="true">◉</span>Motor local</button>
+          <button class="workspace-nav__item" data-view="assets" type="button"><span aria-hidden="true">◇</span>Recursos</button>
+          <button class="workspace-nav__item" data-view="links" type="button"><span aria-hidden="true">↗</span>Enlaces</button>
+          <button class="workspace-nav__item" data-view="images" type="button"><span aria-hidden="true">▧</span>Imágenes</button>
+          <button class="workspace-nav__item" data-view="data" type="button"><span aria-hidden="true">{ }</span>Datos</button>
+          <button class="workspace-nav__item" data-view="selector" type="button"><span aria-hidden="true">⌕</span>Selector CSS</button>
+          <button class="workspace-nav__item" data-view="compare" type="button"><span aria-hidden="true">⇆</span>Comparar A/B</button>
+          <button class="workspace-nav__item" data-view="exports" type="button"><span aria-hidden="true">⇩</span>Exportar</button>
+        </nav>
+
+        <div class="workspace-content">
+          <section class="view is-active" id="view-overview" data-view-panel="overview">
+            <div class="view-heading"><div><p class="eyebrow">VISIÓN GENERAL</p><h3>Qué hemos encontrado</h3></div></div>
+            <div class="metric-grid" id="overview-metrics"></div>
+            <div class="two-col">
+              <article class="panel-card"><div class="panel-card__head"><h4>Hallazgos prioritarios</h4><span class="counter" id="issues-count">0</span></div><div id="issues-list" class="issue-list"></div></article>
+              <article class="panel-card"><div class="panel-card__head"><h4>Identidad de la página</h4></div><dl class="detail-list" id="identity-list"></dl></article>
+            </div>
+            <article class="panel-card"><div class="panel-card__head"><h4>Estructura detectada</h4></div><div class="component-map" id="component-map"></div></article>
+          </section>
+
+          <section class="view" id="view-content" data-view-panel="content" hidden>
+            <div class="view-heading">
+              <div><p class="eyebrow">TEXTO SCRAPEADO</p><h3>Contenido de la página</h3><p>Texto legible reconstruido del HTML descargado, listo para leer, copiar o descargar.</p></div>
+              <div class="table-tools">
+                <select id="content-mode" aria-label="Formato de visualización"><option value="text">Texto legible</option><option value="markdown">Markdown</option><option value="html">HTML original</option></select>
+                <button class="secondary-btn" id="btn-copy-content" type="button">Copiar</button>
+              </div>
+            </div>
+            <div class="metric-grid" id="content-metrics"></div>
+            <article class="panel-card"><div id="content-body"></div></article>
+            <div class="export-grid export-grid--compact">
+              <button class="export-card" data-content-export="txt" type="button"><span class="export-card__icon">¶</span><strong>Contenido TXT</strong><small>Texto plano legible</small></button>
+              <button class="export-card" data-content-export="md" type="button"><span class="export-card__icon">M↓</span><strong>Contenido Markdown</strong><small>Con encabezados, listas y tablas</small></button>
+              <button class="export-card" data-content-export="html" type="button"><span class="export-card__icon">&lt;/&gt;</span><strong>HTML original</strong><small>Snapshot completo descargado</small></button>
+              <button class="export-card" data-content-export="css" type="button"><span class="export-card__icon">#</span><strong>CSS combinado</strong><small>Inline + hojas externas accesibles</small></button>
+            </div>
+          </section>
+
+          <section class="view" id="view-design" data-view-panel="design" hidden>
+            <div class="view-heading"><div><p class="eyebrow">DESIGN SYSTEM EXTRACTOR</p><h3>ADN visual de la página</h3><p>Tokens inferidos a partir del HTML, estilos inline y hojas CSS accesibles.</p></div><button class="secondary-btn" id="btn-copy-design" type="button">Copiar resumen visual</button></div>
+            <div class="design-hero">
+              <div><span class="label">ESTILO INFERIDO</span><h4 id="design-style-name">—</h4><div class="chip-row" id="design-tags"></div></div>
+              <div class="design-confidence"><span>Confianza</span><strong id="design-confidence">0%</strong></div>
+            </div>
+            <div class="design-grid">
+              <article class="panel-card"><div class="panel-card__head"><h4>Paleta dominante</h4><span class="counter" id="colors-count">0</span></div><div class="swatch-grid" id="color-palette"></div></article>
+              <article class="panel-card"><div class="panel-card__head"><h4>Tokens recomendados</h4></div><div class="token-preview" id="token-preview"></div></article>
+              <article class="panel-card"><div class="panel-card__head"><h4>Tipografía</h4></div><div id="typography-summary"></div></article>
+              <article class="panel-card"><div class="panel-card__head"><h4>Forma y profundidad</h4></div><div id="shape-summary"></div></article>
+            </div>
+            <article class="panel-card"><div class="panel-card__head"><h4>Inventario del sistema visual</h4></div><div class="inventory-grid" id="design-inventory"></div></article>
+            <article class="panel-card"><div class="panel-card__head"><h4>Variables CSS encontradas</h4><span class="counter" id="variables-count">0</span></div><div class="code-table-wrap"><table class="data-table" id="variables-table"><thead><tr><th>Variable</th><th>Valor</th><th>Usos</th></tr></thead><tbody></tbody></table></div></article>
+          </section>
+
+          <section class="view" id="view-seo" data-view-panel="seo" hidden>
+            <div class="view-heading"><div><p class="eyebrow">SEO · CONTENIDO · DATOS ESTRUCTURADOS</p><h3>Visibilidad y semántica</h3></div></div>
+            <div class="two-col"><article class="panel-card"><div class="panel-card__head"><h4>Metadatos</h4></div><dl class="detail-list" id="seo-list"></dl></article><article class="panel-card"><div class="panel-card__head"><h4>Jerarquía de encabezados</h4><span class="counter" id="headings-count">0</span></div><div id="heading-tree" class="heading-tree"></div></article></div>
+            <div class="two-col"><article class="panel-card"><div class="panel-card__head"><h4>Vista previa en Google</h4></div><div class="serp-preview" id="serp-preview"></div></article><article class="panel-card"><div class="panel-card__head"><h4>Tarjeta social (Open Graph)</h4></div><div id="social-preview"></div></article></div>
+            <article class="panel-card"><div class="panel-card__head"><h4>Open Graph y redes</h4></div><dl class="detail-list" id="social-list"></dl></article>
+            <article class="panel-card"><div class="panel-card__head"><h4>JSON-LD / Schema.org</h4><span class="counter" id="schema-count">0</span></div><div id="schema-list" class="schema-list"></div></article>
+          </section>
+
+          <section class="view" id="view-a11y" data-view-panel="a11y" hidden>
+            <div class="view-heading"><div><p class="eyebrow">AUDITORÍA AUTOMÁTICA</p><h3>Accesibilidad y buenas prácticas</h3><p>Revisión estática orientativa. No sustituye pruebas con lector de pantalla ni auditorías WCAG manuales.</p></div></div>
+            <div class="metric-grid" id="a11y-metrics"></div>
+            <article class="panel-card"><div class="panel-card__head"><h4>Comprobaciones</h4></div><div class="check-list" id="a11y-checks"></div></article>
+            <article class="panel-card"><div class="panel-card__head"><h4>Contraste WCAG de la paleta</h4><span class="counter" id="contrast-count">0</span></div><p class="field-help">Combinaciones de color de texto y fondo detectadas en el CSS. AA requiere 4,5:1 en texto normal y 3:1 en texto grande; AAA requiere 7:1. Es una estimación sobre pares declarados, no sobre el render final.</p><div class="code-table-wrap"><table class="data-table" id="contrast-table"><thead><tr><th>Muestra</th><th>Combinación</th><th>Ratio</th><th>Veredicto</th></tr></thead><tbody></tbody></table></div></article>
+          </section>
+
+          <section class="view" id="view-tech" data-view-panel="tech" hidden>
+            <div class="view-heading"><div><p class="eyebrow">HUELLA TECNOLÓGICA</p><h3>Frameworks, servicios y patrones</h3></div></div>
+            <div class="tech-grid" id="tech-grid"></div>
+            <div class="two-col"><article class="panel-card"><div class="panel-card__head"><h4>Riesgos de rendimiento</h4></div><div class="check-list" id="performance-checks"></div></article><article class="panel-card"><div class="panel-card__head"><h4>Seguridad observable</h4></div><div class="check-list" id="security-checks"></div></article></div>
+          </section>
+
+          <section class="view" id="view-engine" data-view-panel="engine" hidden>
+            <div class="view-heading"><div><p class="eyebrow">NÚCLEO LOCAL</p><h3>Playwright, sesiones y herramientas del sistema</h3><p>Esta sección solo usa el servicio que ejecutas en tu propio equipo.</p></div><button class="secondary-btn" id="btn-refresh-engine" type="button">Comprobar motor</button></div>
+            <div class="engine-capability-grid" id="engine-capabilities"></div>
+            <div class="two-col engine-grid">
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>Captura y artefactos</h4><span class="counter" id="engine-artifact-count">0</span></div>
+                <div id="engine-preview" class="engine-preview"><p class="empty-state">Analiza una URL con el motor local para generar captura, PDF y datos de red.</p></div>
+                <div class="panel-actions" id="engine-artifact-actions"></div>
+              </article>
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>Sesión manual persistente</h4></div>
+                <p class="field-help">Abre un navegador visible para iniciar sesión o resolver manualmente un desafío. No se automatizan ni eluden CAPTCHA o controles de acceso.</p>
+                <div class="tool-row"><input id="session-name" type="text" value="" placeholder="perfil-principal"><button class="primary-btn" id="btn-open-session" type="button"><span>Abrir navegador</span></button></div>
+                <div class="tool-row"><button class="secondary-btn" id="btn-close-session" type="button">Cerrar sesión abierta</button><button class="secondary-btn" id="btn-engine-history" type="button">Historial SQLite</button></div>
+                <pre class="tool-output" id="session-output">Sin sesión abierta.</pre>
+              </article>
+            </div>
+            <article class="panel-card">
+              <div class="panel-card__head"><h4>API y red observadas</h4><span class="counter" id="engine-api-count">0</span></div>
+              <div class="code-table-wrap"><table class="data-table" id="engine-api-table"><thead><tr><th>Método</th><th>Tipo</th><th>Estado</th><th>URL</th></tr></thead><tbody></tbody></table></div>
+              <pre class="tool-output" id="engine-performance">Sin métricas del navegador.</pre>
+            </article>
+            <div class="two-col engine-grid">
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>OCR local</h4></div>
+                <input id="ocr-file" type="file" accept="image/*">
+                <div class="tool-row"><select id="ocr-language"><option value="spa+eng">Español + inglés</option><option value="spa">Español</option><option value="eng">Inglés</option></select><button class="primary-btn" id="btn-run-ocr" type="button"><span>Reconocer texto</span></button></div>
+                <textarea id="ocr-output" rows="8" placeholder="El texto reconocido aparecerá aquí…"></textarea>
+              </article>
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>IA local con Ollama</h4></div>
+                <div class="tool-row"><input id="ollama-model" type="text" placeholder="Modelo instalado, p. ej. qwen3:8b"><button class="primary-btn" id="btn-run-ai" type="button"><span>Analizar expediente</span></button></div>
+                <textarea id="ai-prompt" rows="4" placeholder="Pregunta sobre la página…">Resume la página, detecta riesgos y propone mejoras concretas.</textarea>
+                <textarea id="ai-output" rows="8" placeholder="Respuesta del modelo local…"></textarea>
+              </article>
+            </div>
+            <div class="two-col engine-grid">
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>Inspector multimedia · FFprobe</h4></div>
+                <input id="media-file" type="file" accept="audio/*,video/*,image/*">
+                <div class="panel-actions"><button class="primary-btn" id="btn-probe-media" type="button"><span>Inspeccionar archivo</span></button></div>
+                <pre class="tool-output" id="media-output">Selecciona un archivo multimedia.</pre>
+              </article>
+              <article class="panel-card">
+                <div class="panel-card__head"><h4>Workspace Git local</h4></div>
+                <label class="field-label" for="git-path">Ruta relativa dentro del workspace autorizado</label>
+                <input id="git-path" type="text" value="." spellcheck="false">
+                <div class="tool-row"><button class="secondary-btn" id="btn-git-init" type="button">Inicializar Git</button><button class="primary-btn" id="btn-git-status" type="button"><span>Estado</span></button></div>
+                <pre class="tool-output" id="git-output">Sin consulta.</pre>
+              </article>
+            </div>
+            <article class="panel-card">
+              <div class="panel-card__head"><h4>Rastreo autorizado del sitio</h4></div>
+              <p class="field-help">Recorre solo enlaces del mismo origen, con límites explícitos. Respeta robots.txt, condiciones de uso y la legislación aplicable.</p>
+              <div class="tool-row"><select id="crawl-pages"><option value="10">10 páginas</option><option value="25" selected>25 páginas</option><option value="50">50 páginas</option></select><select id="crawl-depth"><option value="1">Profundidad 1</option><option value="2" selected>Profundidad 2</option><option value="3">Profundidad 3</option></select><button class="primary-btn" id="btn-run-crawl" type="button"><span>Rastrear sitio</span></button></div>
+              <pre class="tool-output" id="crawl-output">Sin rastreo.</pre>
+            </article>
+          </section>
+
+          <section class="view" id="view-assets" data-view-panel="assets" hidden>
+            <div class="view-heading"><div><p class="eyebrow">INVENTARIO</p><h3>Recursos y dependencias</h3></div><div class="table-tools"><input id="asset-filter" type="search" placeholder="Filtrar recursos…"><button class="secondary-btn" data-csv="assets" type="button">CSV</button></div></div>
+            <div class="code-table-wrap"><table class="data-table" id="assets-table"><thead><tr><th>Tipo</th><th>URL / recurso</th><th>Atributos</th><th>Origen</th></tr></thead><tbody></tbody></table></div>
+          </section>
+
+          <section class="view" id="view-links" data-view-panel="links" hidden>
+            <div class="view-heading"><div><p class="eyebrow">ARQUITECTURA DE NAVEGACIÓN</p><h3>Enlaces encontrados</h3></div><div class="table-tools"><input id="link-filter" type="search" placeholder="Filtrar enlaces…"><select id="link-kind"><option value="all">Todos</option><option value="internal">Internos</option><option value="external">Externos</option><option value="email">Email</option><option value="phone">Teléfono</option></select><button class="secondary-btn" data-csv="links" type="button">CSV</button></div></div>
+            <div class="code-table-wrap"><table class="data-table" id="links-table"><thead><tr><th>Texto</th><th>Destino</th><th>Tipo</th><th>Rel</th></tr></thead><tbody></tbody></table></div>
+          </section>
+
+          <section class="view" id="view-images" data-view-panel="images" hidden>
+            <div class="view-heading"><div><p class="eyebrow">MEDIA</p><h3>Imágenes y accesibilidad visual</h3></div><div class="table-tools"><input id="image-filter" type="search" placeholder="Filtrar imágenes…"><button class="secondary-btn" data-csv="images" type="button">CSV</button></div></div>
+            <div class="image-gallery" id="image-gallery"></div>
+          </section>
+
+          <section class="view" id="view-data" data-view-panel="data" hidden>
+            <div class="view-heading"><div><p class="eyebrow">EXTRACCIÓN</p><h3>Datos detectados</h3></div></div>
+            <div class="data-cards" id="detected-data"></div>
+            <article class="panel-card"><div class="panel-card__head"><h4>Tablas HTML</h4><span class="counter" id="tables-count">0</span></div><div id="tables-preview"></div></article>
+            <article class="panel-card"><div class="panel-card__head"><h4>Feeds RSS / Atom / JSON</h4><span class="counter" id="feeds-count">0</span></div><div id="feeds-list"></div></article>
+            <article class="panel-card" id="rendered-card" hidden><div class="panel-card__head"><h4>Contenido renderizado (rescate SPA)</h4></div><div id="rendered-content"></div></article>
+          </section>
+
+          <section class="view" id="view-selector" data-view-panel="selector" hidden>
+            <div class="view-heading"><div><p class="eyebrow">CONSOLA DOM</p><h3>Extractor por selector CSS</h3></div></div>
+            <article class="panel-card">
+              <div class="selector-row"><input id="selector-input" type="text" spellcheck="false" placeholder="article h2, .card, [data-product]"><select id="selector-output"><option value="text">Texto</option><option value="html">HTML exterior</option><option value="href">href absoluto</option><option value="src">src absoluto</option><option value="json">Atributos JSON</option></select><button class="primary-btn" id="btn-run-selector" type="button"><span>Extraer</span><b aria-hidden="true">→</b></button></div>
+              <p class="field-help">El selector se ejecuta sobre el documento HTML descargado. No incluye elementos creados después por JavaScript.</p>
+              <div class="selector-results" id="selector-results"><p class="empty-state">Introduce un selector para empezar.</p></div>
+              <div class="panel-actions"><button class="secondary-btn" id="btn-copy-selector" type="button" disabled>Copiar</button><button class="secondary-btn" id="btn-export-selector" type="button" disabled>Exportar TXT</button></div>
+            </article>
+            <article class="panel-card">
+              <div class="panel-card__head"><h4>Extractor por expresión regular</h4></div>
+              <div class="regex-row"><input id="regex-input" type="text" spellcheck="false" placeholder="precio[:\s]*([\d.,]+)"><input id="regex-flags" type="text" spellcheck="false" value="gi" aria-label="Flags" class="regex-flags"><select id="regex-target"><option value="html">Sobre HTML</option><option value="text">Sobre texto visible</option></select><select id="regex-output"><option value="match">Coincidencia completa</option><option value="groups">Grupos capturados</option></select><button class="primary-btn" id="btn-run-regex" type="button"><span>Ejecutar</span><b aria-hidden="true">→</b></button></div>
+              <p class="field-help">Flags admitidas: g, i, m, s, u, y. Límite: 3 MB de origen y 2.000 coincidencias. Un patrón con retroceso catastrófico puede congelar la pestaña: pruébalo primero sobre texto visible.</p>
+              <div class="selector-results" id="regex-results"><p class="empty-state">Introduce una expresión regular para empezar.</p></div>
+              <div class="panel-actions"><button class="secondary-btn" id="btn-copy-regex" type="button" disabled>Copiar</button><button class="secondary-btn" id="btn-export-regex" type="button" disabled>Exportar TXT</button></div>
+            </article>
+          </section>
+
+          <section class="view" id="view-compare" data-view-panel="compare" hidden>
+            <div class="view-heading"><div><p class="eyebrow">DIFERENCIAL</p><h3>Comparador A/B</h3><p>Fija una página como base A y analiza otra: puntuaciones, tecnologías, tokens y peso lado a lado.</p></div><button class="ghost-btn" id="btn-clear-baseline" type="button">Quitar base A</button></div>
+            <article class="panel-card"><div id="compare-body"></div></article>
+          </section>
+
+          <section class="view" id="view-exports" data-view-panel="exports" hidden>
+            <div class="view-heading"><div><p class="eyebrow">PAQUETE DE SALIDA</p><h3>Convierte el análisis en material reutilizable</h3></div></div>
+            <div class="export-grid">
+              <button class="export-card" data-export="report-html" type="button"><span class="export-card__icon">◫</span><strong>Informe HTML</strong><small>Auditoría visual autocontenida</small></button>
+              <button class="export-card" data-export="full-json" type="button"><span class="export-card__icon">{ }</span><strong>JSON completo</strong><small>Todos los datos del expediente</small></button>
+              <button class="export-card" data-export="tokens-json" type="button"><span class="export-card__icon">◈</span><strong>Design tokens JSON</strong><small>Paleta, tipografía, forma y motion</small></button>
+              <button class="export-card" data-export="tokens-css" type="button"><span class="export-card__icon">#</span><strong>Variables CSS</strong><small>:root listo para reutilizar</small></button>
+              <button class="export-card" data-export="design-md" type="button"><span class="export-card__icon">M↓</span><strong>Design System MD</strong><small>Documentación para otros proyectos</small></button>
+              <button class="export-card" data-export="style-guide" type="button"><span class="export-card__icon">▧</span><strong>Style guide HTML</strong><small>Muestra visual de los tokens</small></button>
+              <button class="export-card" data-export="recreate-prompt" type="button"><span class="export-card__icon">✦</span><strong>Prompt de recreación</strong><small>Claude, ChatGPT, Gemini o Cursor</small></button>
+              <button class="export-card" data-export="starter-css" type="button"><span class="export-card__icon">⌘</span><strong>Starter CSS</strong><small>Base visual limpia y editable</small></button>
+              <button class="export-card" data-export="issues-csv" type="button"><span class="export-card__icon">!</span><strong>Issues CSV</strong><small>Backlog priorizado de mejoras</small></button>
+              <button class="export-card" data-export="dossier-zip" type="button"><span class="export-card__icon">▣</span><strong>Expediente ZIP</strong><small>Todos los artefactos + snapshot HTML/CSS</small></button>
+              <button class="export-card" data-export="palette-png" type="button"><span class="export-card__icon">▤</span><strong>Paleta PNG</strong><small>Imagen de los colores dominantes</small></button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="history-section" id="history-section" hidden>
+      <div class="section-heading"><div><p class="eyebrow">ARCHIVO LOCAL</p><h2>Análisis recientes</h2></div><button class="ghost-btn" id="btn-clear-history" type="button">Vaciar historial</button></div>
+      <div class="history-list" id="history-list"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div><strong>SCRAPER 404 OMNISCIENT</strong><p>Suite web + motor local responsable. Puede usar sesiones manuales, pero no elude CAPTCHA, autenticación ni protecciones de acceso.</p></div>
+    <div class="footer__links"><button class="text-btn" id="btn-privacy" type="button">Privacidad y límites</button><a href="README.md">Documentación</a><span id="app-version">v4.0.1</span></div>
+  </footer>
+
+  <dialog id="settings-dialog" class="dialog">
+    <form method="dialog" class="dialog__card">
+      <div class="dialog__head"><div><p class="eyebrow">CONFIGURACIÓN</p><h2 id="settings-title">Preferencias</h2></div><button class="icon-btn" value="cancel" aria-label="Cerrar" type="submit">×</button></div>
+
+      <div class="dialog__tabs" role="tablist" aria-label="Secciones de configuración">
+        <button type="button" role="tab" id="tab-appearance" aria-controls="pane-appearance" aria-selected="true" data-tab="appearance">Apariencia</button>
+        <button type="button" role="tab" id="tab-engine" aria-controls="pane-engine" aria-selected="false" data-tab="engine">Descarga web</button>
+        <button type="button" role="tab" id="tab-local" aria-controls="pane-local" aria-selected="false" data-tab="local">Motor local</button>
+      </div>
+
+      <div id="pane-appearance" role="tabpanel" aria-labelledby="tab-appearance">
+        <label class="field-label">Skin</label>
+        <div class="skin-grid" id="skin-grid" role="group" aria-label="Elegir skin"></div>
+        <p class="field-help">Los skins solo cambian los tokens visuales. No afectan al motor de análisis ni a los resultados.</p>
+        <div class="pref-row">
+          <div><strong>Densidad</strong><p>Compacta más datos por pantalla o deja respirar la interfaz.</p></div>
+          <div class="seg" id="density-seg" role="group" aria-label="Densidad de la interfaz">
+            <button type="button" data-density="compact">Compacta</button>
+            <button type="button" data-density="normal">Normal</button>
+            <button type="button" data-density="comfortable">Amplia</button>
+          </div>
+        </div>
+        <div class="pref-row">
+          <div><strong>Movimiento</strong><p>Desactiva animaciones. El sistema ya respeta <code>prefers-reduced-motion</code>.</p></div>
+          <div class="seg" id="motion-seg" role="group" aria-label="Animaciones">
+            <button type="button" data-motion="on">Activado</button>
+            <button type="button" data-motion="off">Reducido</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pane-engine" role="tabpanel" aria-labelledby="tab-engine" hidden>
+      <label class="field-label" for="proxy-mode">Estrategia CORS</label>
+      <select id="proxy-mode">
+        <option value="auto">Automático: directo → AllOrigins → CodeTabs</option>
+        <option value="direct">Solo petición directa</option>
+        <option value="allorigins">Solo AllOrigins</option>
+        <option value="codetabs">Solo CodeTabs</option>
+        <option value="custom">Proxy personalizado</option>
+      </select>
+      <label class="field-label" for="custom-proxy">Plantilla de proxy personalizado</label>
+      <input id="custom-proxy" type="text" spellcheck="false" placeholder="https://proxy.example/?url={url}">
+      <p class="field-help">Usa <code>{url}</code> donde deba insertarse la URL codificada. La configuración se guarda solo en este navegador.</p>
+      <div class="split-fields compact">
+        <div><label class="field-label" for="timeout-input">Timeout por intento</label><select id="timeout-input"><option value="8000">8 s</option><option value="12000" selected>12 s</option><option value="18000">18 s</option><option value="25000">25 s</option></select></div>
+        <div><label class="field-label" for="max-html-input">Límite HTML</label><select id="max-html-input"><option value="4194304">4 MB</option><option value="8388608" selected>8 MB</option><option value="12582912">12 MB</option></select></div>
+      </div>
+      </div>
+
+      <div id="pane-local" role="tabpanel" aria-labelledby="tab-local" hidden>
+        <label class="field-label" for="engine-mode">Modo de ejecución</label>
+        <select id="engine-mode"><option value="auto">Automático: motor local → modo web</option><option value="local">Exigir motor local</option><option value="browser">Solo modo web</option></select>
+        <div class="split-fields compact">
+          <div><label class="field-label" for="engine-endpoint">Dirección del motor</label><input id="engine-endpoint" type="url" value="http://127.0.0.1:40404" spellcheck="false"></div>
+          <div><label class="field-label" for="engine-key">Clave de vinculación</label><input id="engine-key" type="password" autocomplete="off" spellcheck="false" placeholder="Se muestra al iniciar el motor"></div>
+        </div>
+        <div class="split-fields compact">
+          <div><label class="field-label" for="engine-browser">Navegador</label><select id="engine-browser"><option value="chromium">Chromium</option><option value="chrome">Google Chrome</option><option value="msedge">Microsoft Edge</option><option value="firefox">Firefox</option><option value="webkit">WebKit</option></select></div>
+          <div><label class="field-label" for="engine-wait">Esperar hasta</label><select id="engine-wait"><option value="domcontentloaded">DOM listo</option><option value="load">Carga completa</option><option value="networkidle">Red inactiva</option></select></div>
+        </div>
+        <label class="check-row"><input id="engine-allow-private" type="checkbox"> <span>Permitir destinos privados/locales bajo mi responsabilidad</span></label>
+        <label class="check-row"><input id="engine-block-ads" type="checkbox" checked> <span>Bloquear rastreadores y publicidad durante el renderizado</span></label>
+        <p class="field-help">La clave protege el servicio localhost frente a páginas ajenas. En la versión publicada, el navegador puede pedir permiso para conectar con este dispositivo: acéptalo solo cuando hayas iniciado tú el motor. No publiques ni compartas la clave.</p>
+        <div class="panel-actions"><button class="secondary-btn" id="btn-test-engine" type="button">Probar conexión</button><span id="engine-test-result" class="inline-status">Sin comprobar</span></div>
+      </div>
+
+      <div class="dialog__actions"><button class="secondary-btn" value="cancel" type="submit">Cancelar</button><button class="primary-btn" id="btn-save-settings" value="default" type="submit"><span>Guardar ajustes</span></button></div>
+    </form>
+  </dialog>
+
+  <dialog id="privacy-dialog" class="dialog">
+    <form method="dialog" class="dialog__card dialog__card--wide">
+      <div class="dialog__head"><div><p class="eyebrow">TRANSPARENCIA</p><h2>Privacidad, precisión y límites</h2></div><button class="icon-btn" value="cancel" aria-label="Cerrar" type="submit">×</button></div>
+      <div class="legal-copy">
+        <h3>Modo web</h3><p>El análisis se ejecuta en tu navegador. Cuando una web no permite CORS, la descarga puede pasar por AllOrigins, CodeTabs o el proxy que configures. Esos servicios reciben la URL. Las direcciones privadas o locales nunca se reenvían a proxies públicos.</p>
+        <h3>Motor local opcional</h3><p>El servicio de <code>localhost</code> abre la página con Playwright en tu propio equipo. Puede ejecutar JavaScript, hacer scroll, crear capturas o PDF, conservar un perfil de sesión y registrar peticiones XHR/fetch. La comunicación está protegida con una clave aleatoria. HTML, cookies, capturas, base SQLite y perfiles permanecen en tu dispositivo.</p>
+        <h3>Servicios externos opcionales</h3><p>El rescate SPA web usa r.jina.ai, Wayback Machine consulta archive.org y la vista SERP puede solicitar el favicon a Google. Ollama se admite únicamente en localhost. Ningún servicio se activa sin una acción tuya.</p>
+        <h3>Límites reales</h3><p>El motor local no rompe CAPTCHA, Cloudflare, paywalls, autenticación ni controles de acceso. La sesión visible existe para que el usuario complete legítimamente esos pasos. El rastreo se limita al mismo origen y a los máximos elegidos. El análisis visual continúa siendo una inferencia y debe revisarse antes de reutilizar un diseño.</p>
+        <h3>Uso responsable</h3><p>Analiza únicamente contenido público para el que tengas autorización o un propósito legítimo. Respeta términos de uso, propiedad intelectual, privacidad, robots.txt y legislación aplicable.</p>
+      </div>
+      <div class="dialog__actions"><button class="primary-btn" value="default" type="submit"><span>Entendido</span></button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>

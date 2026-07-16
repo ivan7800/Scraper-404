@@ -1,0 +1,39 @@
+{
+  "name": "Scraper 404 Omniscient — Web + Local Engine",
+  "short_name": "Scraper 404",
+  "description": "Auditoría web avanzada con motor local Playwright opcional, capturas, PDF, OCR, IA local y extracción de sistemas de diseño.",
+  "lang": "es",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090b11",
+  "theme_color": "#090b11",
+  "categories": [
+    "developer",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "version": "4.0.1"
+}
